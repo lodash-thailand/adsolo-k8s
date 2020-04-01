@@ -1,0 +1,54 @@
+version: "3.7"
+services:
+  frontend_app:
+    container_name: adsolo-frontend-app-k8s
+    ports:
+      - "3001:3001"
+    build:
+      context: frontend/app
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/app:/app
+      - /app/node_modules
+      - /app/.next
+
+  frontend_home:
+    container_name: adsolo-frontend-home-k8s
+    ports:
+      - "3000:3000"
+    build:
+      context: frontend/home
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/home:/home
+      - /home/node_modules
+      - /home/.next
+
+  backend:
+    container_name: adsolo-backend-k8s
+    ports:
+      - "2000:2000"
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  database:
+    container_name: adsolo-database-k8s
+    image: "mongo:4.2.3"
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./backend/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    environment:
+      - MONGO_INITDB_DATABASE=adsolo-k8s
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=123456
