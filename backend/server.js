@@ -1,15 +1,53 @@
+const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const express = require('express')
+const cors = require('cors')
+const fs = require('fs')
 const app = express()
 require('dotenv').config()
 const PORT = process.env.PORT || 2000
 
 const ExampleModel = require('./mongoose/models/ExampleModel')
 
+const multer = require('multer')
+let storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/images')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '_' + file.originalname)
+  }
+})
+let uploader = multer({ storage: storage })
+
+app.use(express.static('public'))
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+app.use(cors())
+
 app.get('/api/v1/insert/:text', async (req, res) => {
   const { text } = req.params
   await ExampleModel.create({ text })
   res.json({ text })
+})
+
+app.post('/api/v1/examples', uploader.single('fileInput'), async (req, res) => {
+  try {
+    const data = JSON.parse(JSON.stringify(req.body))
+    if(!data.text || !req.file) {
+      throw new Error('Bad request')
+    }
+
+    const example = await ExampleModel.create({ text: data.text })
+    fs.rename(`./public/images/${req.file.filename}`, `./public/profile/${example._id}.jpg`, (error) => {
+      return
+    })
+
+    return res.json({ result: true, data: example })
+  } catch(error) {
+    console.log(error)
+    res.status(400).json({ result: false })
+  }
 })
 
 app.get('/api/v1/examples', async (req, res) => {
