@@ -48,6 +48,7 @@ services:
       - "27017:27017"
     volumes:
       - ./backend/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - ./backend/db:/data/db
     environment:
       - MONGO_INITDB_DATABASE=adsolo-k8s
       - MONGO_INITDB_ROOT_USERNAME=admin
