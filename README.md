@@ -4,6 +4,7 @@
 PORT=2000
 MONGO_SERVER=mongodb://admin:123456@database:27017/adsolo-k8s
 ```
+หรือปรับ `.env.example` เป็น `.env`
 
 ## วิธีการ deploy ระบบ
 ```
