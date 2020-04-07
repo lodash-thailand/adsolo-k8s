@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 2000
 const ExampleModel = require('./mongoose/models/ExampleModel')
 
 const multer = require('multer')
-let storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/images')
   },
@@ -18,7 +18,7 @@ let storage = multer.diskStorage({
     cb(null, Date.now() + '_' + file.originalname)
   }
 })
-let uploader = multer({ storage: storage })
+const uploader = multer({ storage: storage })
 
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -34,17 +34,17 @@ app.get('/api/v1/insert/:text', async (req, res) => {
 app.post('/api/v1/examples', uploader.single('fileInput'), async (req, res) => {
   try {
     const data = JSON.parse(JSON.stringify(req.body))
-    if(!data.text || !req.file) {
+    if (!data.text || !req.file) {
       throw new Error('Bad request')
     }
 
     const example = await ExampleModel.create({ text: data.text })
-    fs.rename(`./public/images/${req.file.filename}`, `./public/profile/${example._id}.jpg`, (error) => {
-      return
+    fs.rename(`./public/images/${req.file.filename}`, `./public/uploads/${example._id}.jpg`, (error) => {
+      console.log(error)
     })
 
     return res.json({ result: true, data: example })
-  } catch(error) {
+  } catch (error) {
     console.log(error)
     res.status(400).json({ result: false })
   }
