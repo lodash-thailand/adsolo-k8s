@@ -40,6 +40,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - ./backend/public/uploads:/app/public/uploads
 
   database:
     container_name: adsolo-database-k8s
@@ -48,6 +49,7 @@ services:
       - "27017:27017"
     volumes:
       - ./backend/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - ./backend/db:/data/db
     environment:
       - MONGO_INITDB_DATABASE=adsolo-k8s
       - MONGO_INITDB_ROOT_USERNAME=admin
