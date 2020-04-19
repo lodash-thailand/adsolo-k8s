@@ -1,5 +1,5 @@
 # adsolo-k8s
-## ในส่วนของ Backend ต้องสร้างไฟล์ .env เพิ่มเติม
+## ต้องสร้างไฟล์ .env เพิ่มเติม
 ```
 PORT=2000
 MONGO_SERVER=mongodb://admin:123456@database:27017/adsolo-k8s
