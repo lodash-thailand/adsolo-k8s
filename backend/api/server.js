@@ -25,6 +25,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(cors())
 
+require('./healthCheck')(app)
+
 app.get('/api/v1/insert/:text', async (req, res) => {
   const { text } = req.params
   await ExampleModel.create({ text })
