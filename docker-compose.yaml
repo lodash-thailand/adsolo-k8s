@@ -53,10 +53,24 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./backend/api/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
-      - ./backend/api/db:/data/db
+      - ./deploy/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     env_file: .env
     environment:
       - MONGO_INITDB_DATABASE=adsolo-k8s
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=123456
+
+  database-seed:
+    container_name: database-seed
+    image: "mongo:4.2.3"
+    env_file: .env
+    environment:
+      - MONGO_INITDB_DATABASE=adsolo-k8s
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+    volumes:
+      - ./db:/db
+      - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
+    command: "/deploy/init-mongo.sh"
+    depends_on:
+      - database
