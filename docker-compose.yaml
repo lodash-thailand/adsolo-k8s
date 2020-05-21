@@ -15,6 +15,7 @@ services:
       - /app/.next
 
   frontend_home:
+    command: npm run dev
     container_name: adsolo-frontend-home-k8s
     ports:
       - "3000:3000"
