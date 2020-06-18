@@ -1,0 +1,68 @@
+version: "3.7"
+services:
+  frontend_app:
+    container_name: adsolo-frontend-app-k8s_production
+    ports:
+      - "3001:3001"
+    build:
+      context: frontend/app
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+
+  frontend_home:
+    container_name: adsolo-frontend-home-k8s_production
+    ports:
+      - "3000:3000"
+    build:
+      context: frontend/home
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+
+  backend:
+    container_name: adsolo-backend-k8s_production
+    ports:
+      - "2000:2000"
+    build:
+      context: backend/api
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      - MONGO_SERVER=mongodb://admin:123456@database:27017/adsolo-k8s
+      - PORT=2000
+    depends_on:
+      - database
+    volumes:
+      - ./backend/api:/app
+      - /app/node_modules
+      - ./backend/api/public/uploads:/app/public/uploads
+      - ./backend/api/public/images:/app/public/images
+
+  database:
+    container_name: adsolo-database-k8s_production
+    image: "mongo:4.2.3"
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./deploy/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    env_file: .env
+    environment:
+      - MONGO_INITDB_DATABASE=adsolo-k8s
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+
+  database-seed:
+    container_name: database-seed_development
+    image: "mongo:4.2.3"
+    env_file: .env
+    environment:
+      - MONGO_INITDB_DATABASE=adsolo-k8s
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+    volumes:
+      - ./db:/db
+      - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
+    command: "/deploy/init-mongo.sh"
+    depends_on:
+      - database
