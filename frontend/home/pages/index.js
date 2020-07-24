@@ -1,5 +1,11 @@
 import React, { useRef, useState } from 'react'
-import axios from 'axios'
+import getConfig from 'next/config'
+
+import { ROOT_URL } from '../src/config'
+import { manageExample } from '../src/endpoint'
+
+const { publicRuntimeConfig } = getConfig()
+const { BACKEND_DOMAIN_URL } = publicRuntimeConfig
 
 const index = (props) => {
   const { examples } = props
@@ -15,6 +21,7 @@ const index = (props) => {
 
     formData.append('text', textValue)
     formData.append('fileInput', file)
+
     const options = {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -22,14 +29,17 @@ const index = (props) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:2000/api/v1/examples', formData, options)
-      setData([...data, response.data.data])
+      const URL = manageExample.create.getUrl()
+      const response = await manageExample.create.invoke(URL, formData, options)
+      setData([...data, response.data])
       imageRef.current.value = ''
       textRef.current.value = ''
     } catch (error) {
-
+      console.log(error)
     }
   }
+
+  console.log(ROOT_URL)
 
   return (
     <div>
@@ -46,7 +56,7 @@ const index = (props) => {
             return (
               <li key={item._id}>
                 {item.text}:
-                <img src={`http://localhost:2000/uploads/${item._id}.jpg`} width={200} />
+                <img src={`${BACKEND_DOMAIN_URL}/uploads/${item._id}.jpg`} width={200} />
               </li>
             )
           })
@@ -56,14 +66,14 @@ const index = (props) => {
   )
 }
 
+/** =========================================
+ * @description ถ้าใช้ getInitialProps ใช้แบบนี้
+ * ======================================= */
 index.getInitialProps = async () => {
-  let examples = []
-  try {
-    const response = await axios.get('http://backend:2000/api/v1/examples')
-    examples = response.data.result
-  } catch (error) {}
+  const URL = manageExample.list.getUrl()
+  const { result } = await manageExample.list.invoke(URL)
 
-  return { examples }
+  return { examples: result }
 }
 
 export default index
