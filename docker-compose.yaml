@@ -11,15 +11,19 @@ services:
     build:
       context: frontend/app
       dockerfile: Dockerfile
+      # for production
+      args:
+        - REACT_APP_BACKEND_SERVICE_URL=http://backend:2000
+        - REACT_APP_BACKEND_DOMAIN_URL=http://localhost:2000
     stdin_open: true
     environment:
-      - BACKEND_SERVICE_URL=http://backend:2000
-      - BACKEND_DOMAIN_URL=http://localhost:2000
+      - REACT_APP_BACKEND_SERVICE_URL=http://backend:2000
+      - REACT_APP_BACKEND_DOMAIN_URL=http://localhost:2000
     volumes:
       - ./frontend/app:/app
       - /app/node_modules
-    # depends_on:
-    #   - backend
+    depends_on:
+      - backend
 
   frontend_home:
     command: ["npm", "run", "dev"]
@@ -70,17 +74,17 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=123456
 
-  database-seed:
-    container_name: database-seed
-    image: "mongo:4.2.3"
-    env_file: .env
-    environment:
-      - MONGO_INITDB_DATABASE=adsolo-k8s
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=123456
-    volumes:
-      - ./db:/db
-      - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
-    command: "/deploy/init-mongo.sh"
-    depends_on:
-      - database
+  # database-seed:
+  #   container_name: database-seed
+  #   image: "mongo:4.2.3"
+  #   env_file: .env
+  #   environment:
+  #     - MONGO_INITDB_DATABASE=adsolo-k8s
+  #     - MONGO_INITDB_ROOT_USERNAME=admin
+  #     - MONGO_INITDB_ROOT_PASSWORD=123456
+  #   volumes:
+  #     - ./db:/db
+  #     - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
+  #   command: "/deploy/init-mongo.sh"
+  #   depends_on:
+  #     - database

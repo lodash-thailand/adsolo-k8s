@@ -14,10 +14,16 @@ COPY . /app
 # RUN npm run start
 
 # production environment
+ARG REACT_APP_BACKEND_SERVICE_URL
+ARG REACT_APP_BACKEND_DOMAIN_URL
+ENV REACT_APP_GRAPHQL_ENDPOINT=$REACT_APP_GRAPHQL_ENDPOINT
+ENV REACT_APP_BACKEND_DOMAIN_URL=$REACT_APP_BACKEND_DOMAIN_URL
+
 RUN npm run build
 FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
 COPY ./default.conf /etc/nginx/conf.d
+
 EXPOSE 80
 CMD ["sh","-c","nginx -g 'daemon off;'"]
