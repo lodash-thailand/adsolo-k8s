@@ -1,17 +1,22 @@
-import React, { useRef, useState } from 'react'
-import getConfig from 'next/config'
+import React, { useRef, useState, useEffect } from 'react'
 
-import { ROOT_URL } from '../src/config'
-import { manageExample } from '../src/endpoint'
+import { ROOT_URL } from './config'
+import { manageExample } from './endpoint'
 
-const { publicRuntimeConfig } = getConfig()
-const { BACKEND_DOMAIN_URL } = publicRuntimeConfig
-
-const index = (props) => {
-  const { examples } = props
+function App () {
   const textRef = useRef(null)
   const imageRef = useRef(null)
-  const [data, setData] = useState(examples)
+  const [data, setData] = useState([])
+
+  useEffect(() => {
+    const getExampleData = async () => {
+      const URL = manageExample.list.getUrl()
+      const { result } = await manageExample.list.invoke(URL)
+      setData(result)
+    }
+
+    getExampleData()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -39,8 +44,8 @@ const index = (props) => {
     }
   }
 
+  console.log(process.env)
   console.log(ROOT_URL)
-
   return (
     <div>
       <h1>Home Page</h1>
@@ -56,7 +61,7 @@ const index = (props) => {
             return (
               <li key={item._id}>
                 {item.text}:
-                <img src={`${BACKEND_DOMAIN_URL}/uploads/${item._id}.jpg`} width={200} />
+                <img src={`${process.env.REACT_APP_BACKEND_DOMAIN_URL}/uploads/${item._id}.jpg`} width={200} />
               </li>
             )
           })
@@ -66,14 +71,4 @@ const index = (props) => {
   )
 }
 
-/** =========================================
- * @description ถ้าใช้ getInitialProps ใช้แบบนี้
- * ======================================= */
-index.getInitialProps = async () => {
-  const URL = manageExample.list.getUrl()
-  const { result } = await manageExample.list.invoke(URL)
-
-  return { examples: result }
-}
-
-export default index
+export default App

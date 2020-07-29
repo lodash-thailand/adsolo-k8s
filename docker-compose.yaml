@@ -1,33 +1,43 @@
 version: "3.7"
 services:
   frontend_app:
+    # development command
+    # command: ["npm", "run", "start"]
+    # production command
+    command: ["sh","-c","nginx -g 'daemon off;'"]
     container_name: adsolo-frontend-app-k8s
     ports:
-      - "3001:3001"
+      - "3001:80"
     build:
       context: frontend/app
       dockerfile: Dockerfile
-    depends_on:
-      - backend
+      # for production
+      args:
+        - REACT_APP_BACKEND_SERVICE_URL=http://backend:2000
+        - REACT_APP_BACKEND_DOMAIN_URL=http://localhost:2000
+    stdin_open: true
     volumes:
       - ./frontend/app:/app
       - /app/node_modules
-      - /app/.next
+    depends_on:
+      - backend
 
   frontend_home:
-    command: npm run dev
+    command: ["npm", "run", "dev"]
     container_name: adsolo-frontend-home-k8s
     ports:
       - "3000:3000"
     build:
       context: frontend/home
       dockerfile: Dockerfile
+    environment:
+      - BACKEND_SERVICE_URL=http://backend:2000
+      - BACKEND_DOMAIN_URL=http://localhost:2000
+    volumes:
+      - ./frontend/home:/app
+      - /app/node_modules
     depends_on:
       - backend
-    volumes:
-      - ./frontend/home:/home
-      - /home/node_modules
-      - /home/.next
 
   backend:
     container_name: adsolo-backend-k8s
@@ -40,13 +50,13 @@ services:
     environment:
       - MONGO_SERVER=mongodb://admin:123456@database:27017/adsolo-k8s
       - PORT=2000
-    depends_on:
-      - database
     volumes:
       - ./backend/api:/app
       - /app/node_modules
       - ./backend/api/public/uploads:/app/public/uploads
       - ./backend/api/public/images:/app/public/images
+    depends_on:
+      - database
 
   database:
     container_name: adsolo-database-k8s
@@ -61,17 +71,17 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=123456
 
-  database-seed:
-    container_name: database-seed
-    image: "mongo:4.2.3"
-    env_file: .env
-    environment:
-      - MONGO_INITDB_DATABASE=adsolo-k8s
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=123456
-    volumes:
-      - ./db:/db
-      - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
-    command: "/deploy/init-mongo.sh"
-    depends_on:
-      - database
+  # database-seed:
+  #   container_name: database-seed
+  #   image: "mongo:4.2.3"
+  #   env_file: .env
+  #   environment:
+  #     - MONGO_INITDB_DATABASE=adsolo-k8s
+  #     - MONGO_INITDB_ROOT_USERNAME=admin
+  #     - MONGO_INITDB_ROOT_PASSWORD=123456
+  #   volumes:
+  #     - ./db:/db
+  #     - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
+  #   command: "/deploy/init-mongo.sh"
+  #   depends_on:
+  #     - database

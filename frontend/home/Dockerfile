@@ -1,8 +1,14 @@
-FROM node:12.4.0-alpine
-
-WORKDIR /home
-COPY . .
-
+FROM node:12.16.2-alpine AS build
+WORKDIR /app
+COPY package*.json ./
 RUN npm install
+COPY . .
+RUN npm run build
 
-CMD ["npm", "run", "start"]
+FROM nginx:1.17-alpine
+RUN apk add --update nodejs nodejs-npm
+WORKDIR /app
+COPY default.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app /app
+EXPOSE 3000
+CMD ["sh","-c","npm run start & nginx -g 'daemon off;'"]
