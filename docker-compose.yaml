@@ -68,6 +68,15 @@ services:
       - /app/node_modules
       - /app/.next
 
+  https:
+    image: caddy
+    ports:
+      - 80:80
+      - 443:443
+    env_file: .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+
   # database-seed:
   #   image: "mongo:4.2.3"
   #   container_name: seed.adsolo-k8s-dev.com
