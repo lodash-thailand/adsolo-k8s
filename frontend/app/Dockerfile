@@ -9,10 +9,6 @@ RUN npm install --silent
 RUN npm install react-scripts@3.0.1 -g --silent
 COPY . /app
 
-# dev mode
-# EXPOSE 80
-# RUN npm run start
-
 # production environment
 ARG REACT_APP_BACKEND_SERVICE_URL
 ARG REACT_APP_BACKEND_DOMAIN_URL

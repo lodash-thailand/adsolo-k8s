@@ -1,0 +1,58 @@
+version: "3.7"
+services:
+  database:
+    container_name: database.adsolo-k8s.com
+    image: "mongo:4.2.3"
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./deploy/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    env_file: .env
+
+  backend:
+    container_name: api.adsolo-k8s.com
+    ports:
+      - 2000:3000
+    build:
+      context: backend/api
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - database
+
+  frontend:
+    container_name: adsolo-k8s.com
+    ports:
+      - 3000:3000
+    build:
+      context: frontend/home
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - backend
+
+  app:
+    container_name: app.adsolo-k8s.com
+    ports:
+      - 3002:80
+    build:
+      context: frontend/app
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_BACKEND_SERVICE_URL=http://backend:2000
+        - REACT_APP_BACKEND_DOMAIN_URL=http://localhost:2000
+    env_file: .env
+    stdin_open: true
+    depends_on:
+      - backend
+
+  # database-seed:
+  #   image: "mongo:4.2.3"
+  #   container_name: seed.adsolo-k8s.com
+  #   command: "/deploy/init-mongo.sh"
+  #   env_file: .env
+  #   volumes:
+  #     - ./db:/db
+  #     - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
+  #   depends_on:
+  #     - database

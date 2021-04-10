@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   database:
-    container_name: database.adsolo-k8s.com
+    container_name: database.adsolo-k8s-dev.com
     image: "mongo:4.2.3"
     ports:
       - "27017:27017"
@@ -55,13 +55,13 @@ services:
     depends_on:
       - backend
 
-  database-seed:
-    image: "mongo:4.2.3"
-    container_name: seed.adsolo-k8s-dev.com
-    command: "/deploy/init-mongo.sh"
-    env_file: .env
-    volumes:
-      - ./db:/db
-      - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
-    depends_on:
-      - database
+  # database-seed:
+  #   image: "mongo:4.2.3"
+  #   container_name: seed.adsolo-k8s-dev.com
+  #   command: "/deploy/init-mongo.sh"
+  #   env_file: .env
+  #   volumes:
+  #     - ./db:/db
+  #     - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
+  #   depends_on:
+  #     - database
