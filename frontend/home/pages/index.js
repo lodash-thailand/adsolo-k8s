@@ -8,6 +8,7 @@ const { publicRuntimeConfig } = getConfig()
 const { BACKEND_DOMAIN_URL } = publicRuntimeConfig
 
 const index = (props) => {
+  console.log(BACKEND_DOMAIN_URL)
   const { examples } = props
   const textRef = useRef(null)
   const imageRef = useRef(null)
@@ -66,14 +67,25 @@ const index = (props) => {
   )
 }
 
-/** =========================================
- * @description ถ้าใช้ getInitialProps ใช้แบบนี้
- * ======================================= */
-index.getInitialProps = async () => {
+export async function getServerSideProps(context) {
   const URL = manageExample.list.getUrl()
   const { result } = await manageExample.list.invoke(URL)
 
-  return { examples: result }
+  return {
+    props: {
+      examples: result || []
+    }
+  }
 }
+
+/** =========================================
+ * @description ถ้าใช้ getInitialProps ใช้แบบนี้
+ * ======================================= */
+// index.getInitialProps = async () => {
+//   const URL = manageExample.list.getUrl()
+//   const { result } = await manageExample.list.invoke(URL)
+
+//   return { examples: result }
+// }
 
 export default index

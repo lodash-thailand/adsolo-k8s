@@ -1,0 +1,5 @@
+*Dockerfile
+package-lock.json
+.gitignore
+node_modules
+.next
