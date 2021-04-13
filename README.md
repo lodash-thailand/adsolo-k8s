@@ -1,26 +1,59 @@
 # adsolo-k8s
-## ต้องสร้างไฟล์ .env เพิ่มเติม
+
+เป็น Template ของ adsolo-k8s
+
+## Installation
+
+ในโปรเจคนี้เราเตรียมไฟล์สำหรับ Run แบบต่าง ๆ ไว้ รายละเอียดมีดังนี้
+
+### Step ที่ทำครั้งแรกเท่านั้น
+ใส่ค่า hosts เมื่อเข้า adsolo-k8s-dev.com, api.adsolo-k8s-dev.com, admin.adsolo-k8s-dev.com, app.adsolo-k8s-dev.com ให้เรียกไปที่ Service frontend, backend, admin, app ตามลำดับ ใช้คำสั่งนี้ในการตั้งค่า
+
 ```
-PORT=2000
-MONGO_SERVER=mongodb://admin:123456@database:27017/adsolo-k8s
+make hosts
 ```
-หรือปรับ `.env.example` เป็น `.env`
+---
+## คำสั่งต่าง ๆ ที่ใช้งานได้
 
-## วิธีการ deploy ระบบ
+ลบ Hosts ที่ใส่ไว้
 ```
-docker-compose up
+make rm-hosts
 ```
 
-## ทดสอบเพิ่มข้อมูลใส่ Backend
-เข้าไปที่ http://localhost:2000/api/v1/insert/ข้อความที่ต้องการเพิ่ม
-จะเพิ่มข้อความเข้าไปใน mongo
+run project แบบ dev mode
+```
+make dcup-dev
+```
 
-## api
-http://localhost:2000/api/v1/examples แสดงรายการ examples ทั้งหมด (ข้อความที่พิมพ์เข้าไป)
-http://localhost:2000/api/v1/examples/:mongoID แสดงรายการ example ID นั้น ๆ
+run project แบบ production mode
+```
+make dcup-prod
+```
 
-## Project ของ Home
-http://localhost:3000
+ลบ containers ของ pixnode ที่ run
+```
+make dc-down
+```
 
-## Project ของ App
-http://localhost:3001
+ลบ containers และ images ของ pixnode ที่ run
+```
+make dc-clear
+```
+
+ลบ images, containers, networks ของ docker ในเครื่อง
+```
+make dc-reset-to-factory
+```
+
+---
+
+## เข้าใช้งาน
+เมื่อสั่ง run ด้วยคำสั่ง make dcup-dev เรียบร้อย 
+
+เว็บหลักต้องเข้าไปที่ (frontend/home) https://adsolo-k8s-dev.com หรือ http://localhost:3000
+
+ส่วนจัดการ Admin (frontend/admin) https://admin.adsolo-k8s-dev.com หรือ http://localhost:3001
+
+ส่วน app (frontend/app) https://app.adsolo-k8s-dev.com หรือ http://localhost:3002
+
+ส่วน backend (backend) https://api.pixnode-dev.com หรือ http://localhost:2000

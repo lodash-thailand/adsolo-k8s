@@ -1,20 +1,53 @@
 version: "3.7"
 services:
-  frontend_app:
-    # development command
-    # command: ["npm", "run", "start"]
-    # production command
-    command: ["sh","-c","nginx -g 'daemon off;'"]
-    container_name: adsolo-frontend-app-k8s
+  database:
+    container_name: database.adsolo-k8s-dev.com
+    image: "mongo:4.2.3"
     ports:
-      - "3001:80"
+      - "27017:27017"
+    volumes:
+      - ./deploy/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    env_file: .env
+
+  backend:
+    container_name: api.adsolo-k8s-dev.com
+    ports:
+      - 2000:3000
+    build:
+      context: backend/api
+      dockerfile: dev.Dockerfile
+    env_file: .env
+    volumes:
+      - ./backend/api:/app
+      - ./backend/api/public/uploads:/app/public/uploads
+      - ./backend/api/public/images:/app/public/images
+      - /app/node_modules
+    depends_on:
+      - database
+
+  frontend:
+    container_name: adsolo-k8s-dev.com
+    ports:
+      - 3000:3000
+    build:
+      context: frontend/home
+      dockerfile: dev.Dockerfile
+    env_file: .env
+    volumes:
+      - ./frontend/home:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+
+  app:
+    container_name: app.adsolo-k8s-dev.com
+    ports:
+      - 3002:3000
     build:
       context: frontend/app
-      dockerfile: Dockerfile
-      # for production
-      args:
-        - REACT_APP_BACKEND_SERVICE_URL=http://backend:2000
-        - REACT_APP_BACKEND_DOMAIN_URL=http://localhost:2000
+      dockerfile: dev.Dockerfile
+    env_file: .env
     stdin_open: true
     volumes:
       - ./frontend/app:/app
@@ -22,66 +55,35 @@ services:
     depends_on:
       - backend
 
-  frontend_home:
-    command: ["npm", "run", "dev"]
-    container_name: adsolo-frontend-home-k8s
+  admin:
+    container_name: admin.adsolo-k8s-dev.com
     ports:
-      - "3000:3000"
+      - 3001:3000
     build:
-      context: frontend/home
-      dockerfile: Dockerfile
-    environment:
-      - BACKEND_SERVICE_URL=http://backend:2000
-      - BACKEND_DOMAIN_URL=http://localhost:2000
-    volumes:
-      - ./frontend/home:/app
-      - /app/node_modules
-    depends_on:
-      - backend
-
-  backend:
-    container_name: adsolo-backend-k8s
-    ports:
-      - "2000:2000"
-    build:
-      context: backend/api
-      dockerfile: Dockerfile
+      context: frontend/admin
+      dockerfile: dev.Dockerfile
     env_file: .env
-    environment:
-      - MONGO_SERVER=mongodb://admin:123456@database:27017/adsolo-k8s
-      - PORT=2000
     volumes:
-      - ./backend/api:/app
+      - ./frontend/admin:/app
       - /app/node_modules
-      - ./backend/api/public/uploads:/app/public/uploads
-      - ./backend/api/public/images:/app/public/images
-    depends_on:
-      - database
+      - /app/.next
 
-  database:
-    container_name: adsolo-database-k8s
-    image: "mongo:4.2.3"
+  https:
+    image: caddy
     ports:
-      - "27017:27017"
-    volumes:
-      - ./deploy/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - 80:80
+      - 443:443
     env_file: .env
-    environment:
-      - MONGO_INITDB_DATABASE=adsolo-k8s
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=123456
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
 
   # database-seed:
-  #   container_name: database-seed
   #   image: "mongo:4.2.3"
+  #   container_name: seed.adsolo-k8s-dev.com
+  #   command: "/deploy/init-mongo.sh"
   #   env_file: .env
-  #   environment:
-  #     - MONGO_INITDB_DATABASE=adsolo-k8s
-  #     - MONGO_INITDB_ROOT_USERNAME=admin
-  #     - MONGO_INITDB_ROOT_PASSWORD=123456
   #   volumes:
   #     - ./db:/db
   #     - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
-  #   command: "/deploy/init-mongo.sh"
   #   depends_on:
   #     - database

@@ -1,0 +1,19 @@
+{$URL_FRONTEND_ADMIN} {
+  reverse_proxy admin:3000
+  tls internal
+}
+
+{$URL_FRONTEND_HOME} {
+  reverse_proxy frontend:3000
+  tls internal
+}
+
+{$URL_FRONTEND_APP} {
+  reverse_proxy app:3000
+  tls internal
+}
+
+{$URL_BACKEND} {
+  reverse_proxy backend:3000
+  tls internal
+}

@@ -4,8 +4,7 @@ const express = require('express')
 const cors = require('cors')
 const fs = require('fs')
 const app = express()
-require('dotenv').config()
-const PORT = process.env.PORT || 2000
+const PORT = process.env.PORT || 3000
 
 const ExampleModel = require('./models/ExampleModel')
 
