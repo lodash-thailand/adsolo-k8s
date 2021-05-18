@@ -55,6 +55,21 @@ services:
       dockerfile: Dockerfile
     env_file: .env
 
+
+  https:
+    image: caddy
+    container_name: larler-https
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - URL_FRONTEND_ADMIN=https://adsolo-k8s-dev.com
+      - URL_FRONTEND_HOME=https://admin.adsolo-k8s-dev.com
+      - URL_FRONTEND_APP=https://api.larler-dev.com
+      - URL_BACKEND=https://app.adsolo-k8s-dev.com
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+
   # database-seed:
   #   image: "mongo:4.2.3"
   #   container_name: seed.adsolo-k8s.com
