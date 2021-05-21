@@ -5,9 +5,10 @@ services:
     image: "mongo:4.2.3"
     ports:
       - "27017:27017"
-    volumes:
-      - ./deploy/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     env_file: .env
+    volumes:
+      - ./backend/database/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - ./db:/data/db
 
   backend:
     container_name: api.adsolo-k8s-dev.com
@@ -81,13 +82,13 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 
-  # database-seed:
-  #   image: "mongo:4.2.3"
-  #   container_name: seed.adsolo-k8s-dev.com
-  #   command: "/deploy/init-mongo.sh"
-  #   env_file: .env
-  #   volumes:
-  #     - ./db:/db
-  #     - ./deploy/init-mongo.sh:/deploy/init-mongo.sh
-  #   depends_on:
-  #     - database
+  database-seed:
+    image: "mongo:4.2.3"
+    container_name: seed.adsolo-k8s-dev.com
+    command: "/backend/database/seed.sh"
+    env_file: .env
+    volumes:
+      - ./backend/database/restore:/db
+      - ./backend/database/seed.sh:/backend/database/seed.sh
+    depends_on:
+      - database
