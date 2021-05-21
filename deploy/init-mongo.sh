@@ -1,1 +1,0 @@
-mongorestore --host=database --username=$MONGO_INITDB_ROOT_USERNAME --password=$MONGO_INITDB_ROOT_PASSWORD --port=27017 --db $MONGO_INITDB_DATABASE /db
